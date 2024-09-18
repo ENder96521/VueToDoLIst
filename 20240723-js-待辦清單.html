@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待辦清單</title>
+  <link rel="stylesheet" href="./待辦清單.css">
+</head>
+<body>
+  <div class="container" id="app">
+    <h1>TODO LIST</h1>
+    <div class="card input">
+      <input id="item-input" type="text" placeholder="請輸入待辦事項" v-model="item">
+      <button type="button" id="add-btn" class="action-btn" title="新增項目" @click="createItem">{{ text }}</button>
+    </div>
+    <div class="card card-list">
+      <div class="tab-box">
+        <button type="button" class="tab active" data-status="all" @click="filterAll">全部</button>
+        <button type="button" class="tab" data-status="undone" @click="filterNotDone">待完成</button>
+        <button type="button" class="tab" data-status="done" @click="filterDone">已完成</button>
+      </div>
+      <div class="card-content">
+        <ul class="list">
+          <li class="item" v-for="(item, index) in filteredData" :key="index">
+            <label class="checkbox">
+              <input type="checkbox" class="done-input" data-index="index" v-model="item.done">
+              <span class="content">{{ item.item }}</span>
+            </label>
+            <button type="button" class="edit-btn" title="編輯項目" aria-label="編輯項目按鈕" :data-index="index" @click="editItem(index)" >X</button>
+            <button type="button" class="delete-btn" title="刪除項目" aria-label="刪除項目按鈕" :data-index="index" @click="deleteItem(index)">X</button>
+          </li>
+        </ul>
+        <div class="footer-list">
+          <p id="show-count">{{ countData }} 個待完成項目</p>
+          <button id="clear-all-btn" type="button" @click="clearItems">清空所有項目</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    const app = Vue.createApp({
+      data() {
+        return {
+          data: [],
+          item: '',
+          filteredData: [],
+          text: '新增',
+          index: 0,
+        }
+      },
+
+      computed: {
+        countData() {
+          return this.data.filter(item => !item.done).length;
+        }
+      },
+
+      methods: {
+        createItem() {
+          if (this.text === '新增'){
+            this.data.push({ item: this.item, done: false });
+            this.item = '';
+            this.filterAll();
+          } else {
+            this.data[this.index].item = this.item;
+            this.item = '';
+            this.index = 0;
+            this.filterAll();
+            this.text = '新增';
+          }
+        },
+
+        deleteItem(index) {
+          this.data.splice(index, 1);
+          this.filterAll();
+        },
+
+        clearItems() {
+          this.data = [];
+          this.filterAll();
+        },
+
+        filterAll() {
+          this.filteredData = this.data;
+        },
+
+        filterNotDone() {
+          this.filteredData = this.data.filter(item => !item.done);
+        },
+
+        filterDone() {
+          this.filteredData = this.data.filter(item => item.done);
+        },
+
+        editItem(index) {
+          this.index = index;
+          this.text = '編輯';
+          this.item = this.data[index].item;
+        }
+      },
+
+      mounted() {
+        this.filterAll();
+      }
+
+    })
+
+    app.mount('#app');
+  </script>
+  <!-- 題目 -->
+  <!-- 1. 輸入待辦事項，按下新增按鈕後，於下方列表增加一筆待辦事項 -->
+  <!-- 2. 點擊待辦事項後面的X按鈕，可刪除待辦事項 -->
+  <!-- 3. 最下方需顯示多少待完成項目，以及點擊"清空所有項目"按鈕後則將所有待辦事項刪除 -->
+  <!-- 4. 可使用中間的篩選按鈕來篩選出全部、待完成、已完成的項目 -->
+  <!-- 5. 按下待辦事項後面的編輯按鈕，可將該項目帶回上方輸入框，按下修改按鈕後送出便可修改待辦事項 -->
+</body>
+</html>
